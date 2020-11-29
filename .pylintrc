@@ -1,0 +1,10 @@
+[MESSAGES CONTROL]
+disable=missing-docstring,logging-fstring-interpolation,too-few-public-methods,no-member,no-self-use
+
+[MASTER]
+ignore=migrations,venv,tests,.venv,data
+extension-pkg-whitelist=pydantic
+
+[FORMAT]
+max-line-length=120
+indent-string='    '
