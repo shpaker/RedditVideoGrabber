@@ -1,2 +1,4 @@
-moviepy==1.0.3
+aiogram==2.11.2
+click==7.1.2
 httpx==0.16.1
+moviepy==1.0.3

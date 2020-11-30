@@ -1,3 +1,4 @@
+import re
 from logging import getLogger
 from typing import Optional, List
 from urllib.parse import urlparse
@@ -17,7 +18,6 @@ class RedditPage:
 
     def __init__(self, url: str):
         self.url = url
-        self.client = AsyncClient(headers=USER_AGENT_HEADER)
 
     def _parse_dash_playlist(
         self,
@@ -35,23 +35,18 @@ class RedditPage:
     async def read_dash_id(self) -> Optional[str]:
         parsed_url = urlparse(self.url)
         data_url = f'{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}.json'
-        response = await self.client.get(url=data_url)
+        async with AsyncClient(headers=USER_AGENT_HEADER) as client:
+            response = await client.get(url=data_url)
         response.raise_for_status()
-        json_data = response.json()
-        for data in json_data:
-            for child in data['data']['children']:
-                if not child['data'].get('media') or not child['data']['media'].get('reddit_video'):
-                    continue
-                dash_url = child['data']['media']['reddit_video'].get('dash_url')
-                if dash_url:
-                    parsed_dash_url = urlparse(dash_url)
-                    return parsed_dash_url.path.strip('/').split('/')[0]
-        return None
+        regex = r'/([a-zA-Z0-9]+)/DASHPlaylist.mpd'
+        matches = re.findall(regex, response.text)
+        return matches[0] if matches else None
 
     async def videos_entries(self) -> List[RedditVideo]:
         parsed_url = urlparse(self.url)
         dash_id = await self.read_dash_id()
-        response = await self.client.get(f'{parsed_url.scheme}://{REDDIT_HOST}/{dash_id}/DASHPlaylist.mpd')
+        async with AsyncClient(headers=USER_AGENT_HEADER) as client:
+            response = await client.get(f'{parsed_url.scheme}://{REDDIT_HOST}/{dash_id}/DASHPlaylist.mpd')
         response.raise_for_status()
         dash_entries = self._parse_dash_playlist(response.text)
 
