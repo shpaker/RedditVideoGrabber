@@ -2,7 +2,6 @@ from functools import lru_cache
 
 from aiogram import Dispatcher
 
-from rvg.bot.inline_handlers import inline_echo
 from rvg.bot.instance import get_bot
 from rvg.bot.message_handlers import reddit_message_handler, reddit_message_cb_handler
 
