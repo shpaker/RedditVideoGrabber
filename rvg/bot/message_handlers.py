@@ -24,7 +24,7 @@ async def reddit_message_handler(message: types.Message):
         entries = await reddit_page.videos_entries()
     except Exception as err:
         logger.warning(err)
-        await message.reply(f'Error processing {err.__class__.__name__}')
+        await message.reply(f'Video not found or access denied')
         raise
 
     if not entries:

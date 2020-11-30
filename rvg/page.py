@@ -45,6 +45,8 @@ class RedditPage:
     async def videos_entries(self) -> List[RedditVideo]:
         parsed_url = urlparse(self.url)
         dash_id = await self.read_dash_id()
+        if not dash_id:
+            raise ValueError
         async with AsyncClient(headers=USER_AGENT_HEADER) as client:
             response = await client.get(f'{parsed_url.scheme}://{REDDIT_HOST}/{dash_id}/DASHPlaylist.mpd')
         response.raise_for_status()

@@ -20,7 +20,8 @@ class RedditEntry(ABC):
     ):
         self.dash_id = dash_id
         self.entry_id = entry_id
-        self.name = entry_id.split('DASH_')[1] if 'DASH_' in entry_id else entry_id
+        name = entry_id.split('DASH_')[1] if 'DASH_' in entry_id else entry_id
+        self.name = name.rstrip('.mp4')
 
         self.entry_size: Optional[int] = None
 
