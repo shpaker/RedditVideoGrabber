@@ -5,7 +5,7 @@ from aiogram import Bot
 
 
 @lru_cache()
-def get_bot():
+def get_bot() -> Bot:
     token = environ.get('RVG_BOT_TOKEN')
     if not token:
         raise ConnectionError

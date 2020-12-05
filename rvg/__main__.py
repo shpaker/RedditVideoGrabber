@@ -8,7 +8,6 @@ from rvg.bot import dispatcher
 
 logging.basicConfig(level=logging.INFO)
 
-
 if __name__ == '__main__':
     sentry_url = environ.get('RVG_SENTRY_URL')
     sentry_env = environ.get('RVG_SENTRY_ENV')

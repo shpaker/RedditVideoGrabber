@@ -9,12 +9,13 @@ from rvg.page import RedditPage
 from rvg.utils import prettify_size
 
 logger = getLogger(__name__)
-# dp = get_dispatcher()
 
+
+# dp = get_dispatcher()
 
 # regexp='https://www\.reddit\.com/r?[a-zA-Z0-9_.+-/#~]+'
 # @dp.message_handler()
-async def reddit_message_handler(message: types.Message):
+async def reddit_message_handler(message: types.Message) -> None:
     bot = get_bot()
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
     logger.info(f'Receive {message.text} from {message.from_user.username}')
@@ -22,20 +23,19 @@ async def reddit_message_handler(message: types.Message):
     try:
         reddit_page = RedditPage(message.text)
         entries = await reddit_page.videos_entries()
-    except Exception as err:
+    except Exception as err:  # pylint: disable=broad-except
         logger.warning(err)
-        await message.reply(f'Video not found or access denied')
+        await message.reply('Video not found or access denied')
         return None
 
     if not entries:
-        await message.reply(f'Video not found')
+        await message.reply('Video not found')
 
-    row_btns = (
-        types.InlineKeyboardButton(f'{entry.name} ({prettify_size(entry.entry_size)})',
-                                   callback_data=json.dumps(
-                                       entry.dict,
-                                       separators=(',', ':'),
-                                   )) for entry in entries)
+    row_btns = (types.InlineKeyboardButton(f'{entry.name} ({prettify_size(entry.entry_size)})',
+                                           callback_data=json.dumps(
+                                               entry.dict,
+                                               separators=(',', ':'),
+                                           )) for entry in entries)
 
     # for entry in entries:
     keyboard_markup.row(*row_btns)
@@ -44,11 +44,11 @@ async def reddit_message_handler(message: types.Message):
 
 
 # @dp.callback_query_handler()
-async def reddit_message_cb_handler(query: types.CallbackQuery):
+async def reddit_message_cb_handler(query: types.CallbackQuery) -> None:
     bot = get_bot()
     try:
         data = json.loads(query.data)
-    except Exception as err:  # noqa
+    except Exception:  # pylint: disable=broad-except
         return
 
     dash_id: str = data['d']
@@ -61,11 +61,9 @@ async def reddit_message_cb_handler(query: types.CallbackQuery):
         message_id=query.message.message_id,
         reply_markup=keyboard_markup,
     )
-    await bot.edit_message_text(
-        chat_id=query.message.chat.id,
-        message_id=query.message.message_id,
-        text=f'Resolution: {video_id}'
-    )
+    await bot.edit_message_text(chat_id=query.message.chat.id,
+                                message_id=query.message.message_id,
+                                text=f'Resolution: {video_id}')
     video = RedditVideo(
         dash_id=dash_id,
         entry_id=video_id,
