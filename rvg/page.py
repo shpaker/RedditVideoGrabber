@@ -6,7 +6,7 @@ from xml.etree import ElementTree
 
 from httpx import AsyncClient
 
-from rvg.constants import USER_AGENT_HEADER, REDDIT_HOST
+from rvg.constants import USER_AGENT_HEADER, REDDIT_HOST, HTTP_REQUESTS_TIMEOUT
 from rvg.entries import RedditVideo, RedditAudio
 
 logger = getLogger(__name__)
@@ -36,11 +36,12 @@ class RedditPage:
         parsed_url = urlparse(self.url)
         data_url = f'{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}.json'
         async with AsyncClient(headers=USER_AGENT_HEADER) as client:
-            response = await client.get(url=data_url)
+            response = await client.get(url=data_url, timeout=HTTP_REQUESTS_TIMEOUT)
         response.raise_for_status()
         regex = r'/([a-zA-Z0-9]+)/DASHPlaylist.mpd'
         matches = re.findall(regex, response.text)
-        return matches[0] if matches else None
+        res = matches[0] if matches else None
+        return res
 
     async def videos_entries(self) -> List[RedditVideo]:
         parsed_url = urlparse(self.url)
