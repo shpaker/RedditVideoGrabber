@@ -4,6 +4,7 @@ from logging import getLogger
 from aiogram import types
 
 from rvg.bot.instance import get_bot
+from rvg.constants import REDDIT_URL_PATTERN
 from rvg.entries import RedditAudio, RedditVideo
 from rvg.page import RedditPage
 from rvg.utils import prettify_size
@@ -17,11 +18,12 @@ logger = getLogger(__name__)
 # @dp.message_handler()
 async def reddit_message_handler(message: types.Message) -> None:
     bot = get_bot()
+    reddit_url = REDDIT_URL_PATTERN.findall(message.text)[0]
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
-    logger.info(f'Receive {message.text} from {message.from_user.username}')
+    logger.info(f'Receive {reddit_url} from {message.from_user.username}')
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
     try:
-        reddit_page = RedditPage(message.text)
+        reddit_page = RedditPage(reddit_url)
         entries = await reddit_page.videos_entries()
     except Exception as err:  # pylint: disable=broad-except
         logger.warning(err)
